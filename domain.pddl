@@ -1,0 +1,1 @@
+(define (domain smart-qdx-campus))
