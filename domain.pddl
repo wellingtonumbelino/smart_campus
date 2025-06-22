@@ -7,6 +7,7 @@
     light
     projector
     room
+    occupancy
   )
 
   (:predicates
@@ -14,12 +15,16 @@
     (air-condition-on ?a - air_conditioning)
     (light-on ?l - light)
     (projector-on ?p - projector)
+    (occupied ?o - occupancy)
   )
 
   (:functions
     (energy-consumed ?e - energy)
     (time)
     (total-energy-consumed)
+    (current-temperature ?r - room)
+    (air-temperature ?a - air_conditioning)
+    (number_occupants ? o - occupancy)
   )
 
   ; monitoro -> avalio -> executo
@@ -27,9 +32,12 @@
 
   (:action turn_on_air_conditioning
     :parameters (?r - room
-                  ?a - air_conditioning
-                  ?e - energy)
-    :precondition (and (not (air-condition-on ?a)) (in-room ?r))
+                 ?o - occupancy
+                 ?a - air_conditioning
+                 ?e - energy)
+    :precondition (and (< (number_occupants ?o) 0)
+                       (not (air-condition-on ?a))
+                       (in-room ?r))
     :effect (and (air-condition-on ?a)
                   (increase (total-energy-consumed) (energy-consumed ?e)))
   )
@@ -44,9 +52,12 @@
 
   (:action turn_on_light
       :parameters (?r - room
+                   ?o - occupancy
                    ?l - light
                    ?e - energy)
-      :precondition (and (not (light-on ?l)) (in-room ?r))
+      :precondition (and (< (number_occupants ?o) 0)
+                         (not (light-on ?l))
+                         (in-room ?r))
       :effect (and (light-on ?l)
                    (increase (total-energy-consumed) (energy-consumed ?e)))
   )
@@ -74,6 +85,29 @@
       :precondition (and (projector-on ?p) (in-room ?r))
       :effect (and (not (projector-on ?p)))
   )
+
+  (:action temperature_setting_cooling_22
+      :parameters (?a - air_conditioning
+                   ?r - room
+                   ?e - energy)
+      :precondition (and (air-condition-on ?a)
+                         (> (current-temperature ?r) 22)
+                         (= (current-temperature ?r) 25))
+      :effect (and (assign (air-temperature ?a) 22)
+                   (increase (total-energy-consumed) (energy-consumed ?e)))
+  )
+
+  (:action temperature_setting_cooling_25
+      :parameters (?a - air_conditioning
+                   ?r - room
+                   ?e - energy)
+      :precondition (and (air-condition-on ?a)
+                         (< (current-temperature ?r) 25)
+                         (= (current-temperature ?r) 22))
+      :effect (and (assign (air-temperature ?a) 25)
+                   (increase (total-energy-consumed) (energy-consumed ?e)))
+  )
+  
 
   (:durative-action turn-off-air-conditioning-in-interval
     :parameters (
@@ -111,5 +145,3 @@
     )
   )
 )
-
-; como parâmetro podemos ter o ?q ?q_less_ten ?q_greater_ten_less_twenty ?q_greater_twenty - quantity
