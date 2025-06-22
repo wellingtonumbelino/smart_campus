@@ -1,66 +1,114 @@
 (define (domain smart-campus)
-  (:requirements :strips :typing :fluents)
+  (:requirements :strips :typing :fluents :numeric-fluents :negative-preconditions :durative-actions)
 
   (:types
     air_conditioning
+    energy
     light
     projector
     room
   )
 
   (:predicates
-    (device ?d)
-    (device-on ?d - device)
-    (in-room ?d - device ?r - room)
+    (in-room ?r - room)
+    (air-condition-on ?a - air_conditioning)
+    (light-on ?l - light)
+    (projector-on ?p - projector)
   )
 
   (:functions
-    (total-energy-used)
+    (energy-consumed ?e - energy)
+    (time)
+    (total-energy-consumed)
   )
 
-  ; pesquisar como monitorar quantas pessoas tem em sala
-
   ; monitoro -> avalio -> executo
+  ; como saber quanto tempo os dispositivos ficarão ligados?
+
+  (:action turn_on_air_conditioning
+    :parameters (?r - room
+                  ?a - air_conditioning
+                  ?e - energy)
+    :precondition (and (not (air-condition-on ?a)) (in-room ?r))
+    :effect (and (air-condition-on ?a)
+                  (increase (total-energy-consumed) (energy-consumed ?e)))
+  )
+
+  (:action turn_off_air_conditioning
+    :parameters (?a - air_conditioning
+                 ?r - room)
+    :precondition (and (air-condition-on ?a)
+                       (in-room ?r))
+    :effect (and (not (air-condition-on ?a)))
+  )
 
   (:action turn_on_light
       :parameters (?r - room
-                   ?l - light)
-      :precondition (and (device ?l) (in-room ?l ?r))
-      :effect (and (device-on ?l))
+                   ?l - light
+                   ?e - energy)
+      :precondition (and (not (light-on ?l)) (in-room ?r))
+      :effect (and (light-on ?l)
+                   (increase (total-energy-consumed) (energy-consumed ?e)))
   )
 
   (:action turn_off_light
-      :parameters (?r - room
-                   ?l - light)
-      :precondition (and (device ?l)
-                    (device-on ?l))
-      :effect (and (not (device-on ?l)))
+    :parameters (?l - light
+                 ?r - room)
+    :precondition (and (light-on ?l)
+                       (in-room ?r))
+    :effect (and (not (light-on ?l)))
   )
 
-  (:action turn_off_all_lights_in_room_petti
-      :parameters (?r - room
-                   ?l1 - light
-                   ?l2 - light)
-      :precondition (and (no-occupation ?r)
-                    (device ?l1)
-                    (device ?l2)
-                    (device-on ?l1)
-                    (device-on ?l2))
-      :effect (and (not (device-on ?l1))
-              (not (device-on ?l2)))
+  (:action turn_on_projector
+      :parameters (?p - projector
+                   ?r - room
+                   ?e - energy)
+      :precondition (and (not (projector-on ?p)) (in-room ?r))
+      :effect (and (projector-on ?p)
+                   (increase (total-energy-consumed) (energy-consumed ?e)))
   )
 
-  (:action turn_on_all_lights_in_room_pet_ti
-      :parameters (?r - room
-                   ?l1 - light
-                   ?l2 - light)
-      :precondition (and (high-occupation ?r)
-                         (device ?l1)
-                         (device ?l2)
-                         (device-on ?l1)
-                         (device-on ?l2))
-      :effect (and (device-on ?l1)
-                   (device-on ?l2))
+  (:action turn_off_projector
+      :parameters (?p - projector
+                   ?r - room)
+      :precondition (and (projector-on ?p) (in-room ?r))
+      :effect (and (not (projector-on ?p)))
+  )
+
+  (:durative-action turn-off-air-conditioning-in-interval
+    :parameters (
+      ?a - air_conditioning
+      ?r - room
+    )
+    :duration (= ?duration 1)
+    :condition (and 
+        (at start (and (= (time) 432000)
+                        (air-condition-on ?a)))
+        (over all (and (not (air-condition-on ?a))))
+        (at end (and (= (time) 46800)))
+    )
+    :effect (and 
+        (at start (and (not (air-condition-on ?a))))
+        (at end (and (air-condition-on ?a)))
+    )
+  )
+
+  (:durative-action turn-off-light-in-interval
+    :parameters (
+      ?l - light
+      ?r - room
+    )
+    :duration (= ?duration 1)
+    :condition (and 
+        (at start (and (= (time) 432000)
+                        (light-on ?l)))
+        (over all (and (not (light-on ?l))))
+        (at end (and (= (time) 46800)))
+    )
+    :effect (and 
+        (at start (and (not (light-on ?l))))
+        (at end (and (light-on ?l)))
+    )
   )
 )
 
