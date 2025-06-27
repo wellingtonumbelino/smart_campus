@@ -1,5 +1,5 @@
 (define (domain smart-campus)
-  (:requirements :strips :typing :fluents :numeric-fluents :negative-preconditions :durative-actions)
+  (:requirements :strips :typing :fluents :numeric-fluents :durative-actions)
 
   (:types
     air_conditioning
@@ -15,7 +15,6 @@
     (air-condition-on ?a - air_conditioning)
     (light-on ?l - light)
     (projector-on ?p - projector)
-    (occupied ?o - occupancy)
   )
 
   (:functions
