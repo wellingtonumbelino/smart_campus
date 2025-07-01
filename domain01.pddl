@@ -85,7 +85,7 @@
       (at end (air-condition-on ?ac))
     )
     :effect (and (at start (not (air-condition-on ?ac)))
-                 (at end (air-condition-on ?ac))
+                 (at end (air-condition-on ?ac)))
     )
   )
 
