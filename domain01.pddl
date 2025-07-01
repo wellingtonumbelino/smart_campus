@@ -3,7 +3,7 @@
   (:types
     room
     device
-    air-conditioning projector - device
+    air-conditioner projector - device
     switch
     occupancy
   )
@@ -21,7 +21,7 @@
     (total-energy-consumed)
   )
 
-  (:action turn-on-switch-threshold
+  (:action turn-on-switch
     :parameters (?r - room ?o - occupancy ?s - switch ?energy ?min ?max)
     :precondition (and (has-switch ?r ?s)
                        (>= (occupied ?o) ?min)
@@ -31,7 +31,7 @@
                  (increase (total-energy-consumed) ?energy))
   )
 
-  (:action turn-off-switch-threshold
+  (:action turn-off-switch
     :parameters (?r - room ?o - occupancy ?s - switch)
     :precondition (and (has-switch ?r ?s)
                        (= (occupied ?o) 0)
@@ -39,8 +39,8 @@
     :effect (not (switch-on ?s))
   )
 
-  (:action turn-on-air-conditioning-threshold
-    :parameters (?r - room ?o - occupancy ?ac - air-conditioning ?energy ?min ?max)
+  (:action turn-on-air-conditioner
+    :parameters (?r - room ?o - occupancy ?ac - air-conditioner ?energy ?min ?max)
     :precondition (and (has-device ?r ?ac)
                        (>= (occupied ?o) ?min)
                        (<= (occupied ?o) ?max)
@@ -49,15 +49,15 @@
                  (increase (total-energy-consumed) ?energy))
   )
 
-  (:action turn-off-air-conditioning-threshold
-    :parameters (?r - room ?o - occupancy ?ac - air-conditioning)
+  (:action turn-off-air-conditioner
+    :parameters (?r - room ?o - occupancy ?ac - air-conditioner)
     :precondition (and (has-device ?r ?ac)
                        (= (occupied ?o) 0)
                        (in-use ?ac))
     :effect (off ?ac)
   )
 
-  (:action turn-on-projector-threshold
+  (:action turn-on-projector
     :parameters (?r - room ?o - occupancy ?p - projector ?energy ?min ?max)
     :precondition (and (has-device ?r ?p)
                        (>= (occupied ?o) ?min)
@@ -67,7 +67,7 @@
                  (increase (total-energy-consumed) ?energy))
   )
 
-  (:action turn-off-projector-threshold
+  (:action turn-off-projector
     :parameters (?r - room ?o - occupancy ?p - projector)
     :precondition (and (has-device ?r ?p)
                   (= (occupied ?o) 0)
