@@ -1,146 +1,130 @@
-(define (domain smart-campus)
-  (:requirements :strips :typing :fluents :numeric-fluents :durative-actions)
-
+(define (domain smart_campus)
+  (:requirements :strips :typing :negative-preconditions :fluents)
   (:types
-    air_conditioning
-    energy
-    light
-    projector
     room
+    device
+    air-conditioner projector - device
+    switch
     occupancy
+    temperature-sensor
   )
 
   (:predicates
-    (in-room ?r - room)
-    (air-condition-on ?a - air_conditioning)
-    (light-on ?l - light)
-    (projector-on ?p - projector)
+    (switch-on ?s - switch)
+    (in-use ?d - device)
+    (off ?d - device)
+    (device-in-room ?d - device ?r - room)
+    (switch-in-room ?s - switch ?r - room)
+    (sensor-in-room ?ts - temperature-sensor ?r - room)
   )
 
   (:functions
-    (energy-consumed ?e - energy)
-    (time)
+    (occupied ?o - occupancy)
     (total-energy-consumed)
+    (time)
     (current-temperature ?r - room)
-    (air-temperature ?a - air_conditioning)
-    (number_occupants ? o - occupancy)
+    (ac-set-temperature ?ac - air-conditioner)
   )
 
-  ; monitoro -> avalio -> executo
-  ; como saber quanto tempo os dispositivos ficarão ligados?
-
-  (:action turn_on_air_conditioning
-    :parameters (?r - room
-                 ?o - occupancy
-                 ?a - air_conditioning
-                 ?e - energy)
-    :precondition (and (< (number_occupants ?o) 0)
-                       (not (air-condition-on ?a))
-                       (in-room ?r))
-    :effect (and (air-condition-on ?a)
-                  (increase (total-energy-consumed) (energy-consumed ?e)))
+  (:action turn-on-switch
+    :parameters (?r - room ?o - occupancy ?s - switch ?energy ?min ?max)
+    :precondition (and (switch-in-room ?s ?r)
+                       (>= (occupied ?o) ?min)
+                       (<= (occupied ?o) ?max)
+                       (not (switch-on ?s)))
+    :effect (and (switch-on ?s)
+                 (increase (total-energy-consumed) ?energy))
   )
 
-  (:action turn_off_air_conditioning
-    :parameters (?a - air_conditioning
-                 ?r - room)
-    :precondition (and (air-condition-on ?a)
-                       (in-room ?r))
-    :effect (and (not (air-condition-on ?a)))
+  (:action turn-off-switch
+    :parameters (?r - room ?o - occupancy ?s - switch)
+    :precondition (and (switch-in-room ?s ?r)
+                       (= (occupied ?o) 0)
+                       (switch-on ?s))
+    :effect (not (switch-on ?s))
   )
 
-  (:action turn_on_light
-      :parameters (?r - room
-                   ?o - occupancy
-                   ?l - light
-                   ?e - energy)
-      :precondition (and (< (number_occupants ?o) 0)
-                         (not (light-on ?l))
-                         (in-room ?r))
-      :effect (and (light-on ?l)
-                   (increase (total-energy-consumed) (energy-consumed ?e)))
+  (:action turn-on-air-conditioner
+    :parameters (?r - room ?o - occupancy ?ac - air-conditioner ?energy ?min ?max)
+    :precondition (and (device-in-room ?ac ?r)
+                       (>= (occupied ?o) ?min)
+                       (<= (occupied ?o) ?max)
+                       (not (off ?ac)))
+    :effect (and (in-use ?ac)
+                 (increase (total-energy-consumed) ?energy))
   )
 
-  (:action turn_off_light
-    :parameters (?l - light
-                 ?r - room)
-    :precondition (and (light-on ?l)
-                       (in-room ?r))
-    :effect (and (not (light-on ?l)))
+  (:action turn-off-air-conditioner
+    :parameters (?r - room ?o - occupancy ?ac - air-conditioner)
+    :precondition (and (device-in-room ?ac ?r)
+                       (= (occupied ?o) 0)
+                       (in-use ?ac))
+    :effect (off ?ac)
   )
 
-  (:action turn_on_projector
-      :parameters (?p - projector
-                   ?r - room
-                   ?e - energy)
-      :precondition (and (not (projector-on ?p)) (in-room ?r))
-      :effect (and (projector-on ?p)
-                   (increase (total-energy-consumed) (energy-consumed ?e)))
+  (:action turn-on-projector
+    :parameters (?r - room ?o - occupancy ?p - projector ?energy ?min ?max)
+    :precondition (and (device-in-room ?p ?r)
+                       (>= (occupied ?o) ?min)
+                       (<= (occupied ?o) ?max)
+                       (not (off ?p)))
+    :effect (and (in-use ?p)
+                 (increase (total-energy-consumed) ?energy))
   )
 
-  (:action turn_off_projector
-      :parameters (?p - projector
-                   ?r - room)
-      :precondition (and (projector-on ?p) (in-room ?r))
-      :effect (and (not (projector-on ?p)))
+  (:action turn-off-projector
+    :parameters (?r - room ?o - occupancy ?p - projector)
+    :precondition (and (device-in-room ?p ?r)
+                  (= (occupied ?o) 0)
+                  (in-use ?p))
+    :effect (off ?p)
   )
 
-  (:action temperature_setting_cooling_22
-      :parameters (?a - air_conditioning
-                   ?r - room
-                   ?e - energy)
-      :precondition (and (air-condition-on ?a)
-                         (> (current-temperature ?r) 22)
-                         (= (current-temperature ?r) 25))
-      :effect (and (assign (air-temperature ?a) 22)
-                   (increase (total-energy-consumed) (energy-consumed ?e)))
-  )
-
-  (:action temperature_setting_cooling_25
-      :parameters (?a - air_conditioning
-                   ?r - room
-                   ?e - energy)
-      :precondition (and (air-condition-on ?a)
-                         (< (current-temperature ?r) 25)
-                         (= (current-temperature ?r) 22))
-      :effect (and (assign (air-temperature ?a) 25)
-                   (increase (total-energy-consumed) (energy-consumed ?e)))
-  )
-  
-
-  (:durative-action turn-off-air-conditioning-in-interval
-    :parameters (
-      ?a - air_conditioning
-      ?r - room
+  (:action set-ac-temperature-to-25
+    :parameters (?r - room ?ac - air-conditioner ?ts - temperature-sensor)
+    :precondition (and
+      (device-in-room ?ac ?r)
+      (sensor-in-room ?ts ?r)
+      (> (current-temperature ?r) 25)
+      (in-use ?ac)
     )
+    :effect (assign (ac-set-temperature ?ac) 25)
+  )
+
+  (:action set-ac-temperature-to-22
+    :parameters (?r - room ?ac - air-conditioner ?ts - temperature-sensor)
+    :precondition (and
+      (device-in-room ?ac ?r)
+      (sensor-in-room ?ts ?r)
+      (< (current-temperature ?r) 22)
+      (<= (current-temperature ?r) 25)
+      (in-use ?ac)
+    )
+    :effect (assign (ac-set-temperature ?ac) 22)
+  )
+
+  (:durative-action turn-off-air-conditioner-interval
+    :parameters (?ac - air-conditioner ?r - room)
     :duration (= ?duration 1)
-    :condition (and 
-        (at start (and (= (time) 432000)
-                        (air-condition-on ?a)))
-        (over all (and (not (air-condition-on ?a))))
-        (at end (and (= (time) 46800)))
+    :condition (and
+      (at start (and (device-in-room ?ac ?r) (air-condition-on ?ac) (>= (time) 43200) (<= (time) 46800)))
+      (over all (not (air-condition-on ?ac)))
+      (at end (air-condition-on ?ac))
     )
-    :effect (and 
-        (at start (and (not (air-condition-on ?a))))
-        (at end (and (air-condition-on ?a)))
+    :effect (and (at start (not (air-condition-on ?ac)))
+                 (at end (air-condition-on ?ac)))
     )
   )
 
-  (:durative-action turn-off-light-in-interval
-    :parameters (
-      ?l - light
-      ?r - room
-    )
+  (:durative-action turn-off-light-interval
+    :parameters (?l - light ?r - room)
     :duration (= ?duration 1)
-    :condition (and 
-        (at start (and (= (time) 432000)
-                        (light-on ?l)))
-        (over all (and (not (light-on ?l))))
-        (at end (and (= (time) 46800)))
+    :condition (and
+      (at start (and (switch-in-room ?l ?r) (switch-on ?l) (>= (time) 43200) (<= (time) 46800)))
+      (over all (not (switch-on ?l)))
+      (at end (switch-on ?l))
     )
-    :effect (and 
-        (at start (and (not (light-on ?l))))
-        (at end (and (light-on ?l)))
-    )
+    :effect (and (at start (not (switch-on ?l)))
+                 (at end (switch-on ?l))
   )
 )
