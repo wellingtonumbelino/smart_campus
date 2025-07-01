@@ -12,18 +12,19 @@
     (switch-on ?s - switch)
     (in-use ?d - device)
     (off ?d - device)
-    (has-device ?r - room ?d - device)
-    (has-switch ?r - room ?s - switch)
+    (device-in-room ?d - device ?r - room)
+    (switch-in-room ?s - switch ?r - room)
   )
 
   (:functions
     (occupied ?o - occupancy)
     (total-energy-consumed)
+    (time)
   )
 
   (:action turn-on-switch
     :parameters (?r - room ?o - occupancy ?s - switch ?energy ?min ?max)
-    :precondition (and (has-switch ?r ?s)
+    :precondition (and (switch-in-room ?s ?r)
                        (>= (occupied ?o) ?min)
                        (<= (occupied ?o) ?max)
                        (not (switch-on ?s)))
@@ -33,7 +34,7 @@
 
   (:action turn-off-switch
     :parameters (?r - room ?o - occupancy ?s - switch)
-    :precondition (and (has-switch ?r ?s)
+    :precondition (and (switch-in-room ?s ?r)
                        (= (occupied ?o) 0)
                        (switch-on ?s))
     :effect (not (switch-on ?s))
@@ -41,7 +42,7 @@
 
   (:action turn-on-air-conditioner
     :parameters (?r - room ?o - occupancy ?ac - air-conditioner ?energy ?min ?max)
-    :precondition (and (has-device ?r ?ac)
+    :precondition (and (device-in-room ?ac ?r)
                        (>= (occupied ?o) ?min)
                        (<= (occupied ?o) ?max)
                        (not (off ?ac)))
@@ -51,7 +52,7 @@
 
   (:action turn-off-air-conditioner
     :parameters (?r - room ?o - occupancy ?ac - air-conditioner)
-    :precondition (and (has-device ?r ?ac)
+    :precondition (and (device-in-room ?ac ?r)
                        (= (occupied ?o) 0)
                        (in-use ?ac))
     :effect (off ?ac)
@@ -59,7 +60,7 @@
 
   (:action turn-on-projector
     :parameters (?r - room ?o - occupancy ?p - projector ?energy ?min ?max)
-    :precondition (and (has-device ?r ?p)
+    :precondition (and (device-in-room ?p ?r)
                        (>= (occupied ?o) ?min)
                        (<= (occupied ?o) ?max)
                        (not (off ?p)))
@@ -69,9 +70,34 @@
 
   (:action turn-off-projector
     :parameters (?r - room ?o - occupancy ?p - projector)
-    :precondition (and (has-device ?r ?p)
+    :precondition (and (device-in-room ?p ?r)
                   (= (occupied ?o) 0)
                   (in-use ?p))
     :effect (off ?p)
+  )
+
+  (:durative-action turn-off-air-conditioner-interval
+    :parameters (?ac - air-conditioner ?r - room)
+    :duration (= ?duration 1)
+    :condition (and
+      (at start (and (device-in-room ?ac ?r) (air-condition-on ?ac) (>= (time) 43200) (<= (time) 46800)))
+      (over all (not (air-condition-on ?ac)))
+      (at end (air-condition-on ?ac))
+    )
+    :effect (and (at start (not (air-condition-on ?ac)))
+                 (at end (air-condition-on ?ac))
+    )
+  )
+
+  (:durative-action turn-off-light-interval
+    :parameters (?l - light ?r - room)
+    :duration (= ?duration 1)
+    :condition (and
+      (at start (and (switch-in-room ?l ?r) (switch-on ?l) (>= (time) 43200) (<= (time) 46800)))
+      (over all (not (switch-on ?l)))
+      (at end (switch-on ?l))
+    )
+    :effect (and (at start (not (switch-on ?l)))
+                 (at end (switch-on ?l))
   )
 )
