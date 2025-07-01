@@ -12,7 +12,6 @@
   (:predicates
     (switch-on ?s - switch)
     (in-use ?d - device)
-    (off ?d - device)
     (device-in-room ?d - device ?r - room)
     (switch-in-room ?s - switch ?r - room)
     (sensor-in-room ?ts - temperature-sensor ?r - room)
@@ -49,7 +48,7 @@
     :precondition (and (device-in-room ?ac ?r)
                        (>= (occupied ?o) ?min)
                        (<= (occupied ?o) ?max)
-                       (not (off ?ac)))
+                       (not (in-use ?ac)))
     :effect (and (in-use ?ac)
                  (increase (total-energy-consumed) ?energy))
   )
@@ -59,7 +58,7 @@
     :precondition (and (device-in-room ?ac ?r)
                        (= (occupied ?o) 0)
                        (in-use ?ac))
-    :effect (off ?ac)
+    :effect (not (in-use ?ac))
   )
 
   (:action turn-on-projector
@@ -67,7 +66,7 @@
     :precondition (and (device-in-room ?p ?r)
                        (>= (occupied ?o) ?min)
                        (<= (occupied ?o) ?max)
-                       (not (off ?p)))
+                       (not (in-use ?p)))
     :effect (and (in-use ?p)
                  (increase (total-energy-consumed) ?energy))
   )
@@ -77,7 +76,7 @@
     :precondition (and (device-in-room ?p ?r)
                   (= (occupied ?o) 0)
                   (in-use ?p))
-    :effect (off ?p)
+    :effect (not (in-use ?p))
   )
 
   (:action set-ac-temperature-to-25
@@ -105,26 +104,36 @@
 
   (:durative-action turn-off-air-conditioner-interval
     :parameters (?ac - air-conditioner ?r - room)
-    :duration (= ?duration 1)
+    :duration (= ?duration 3600)
     :condition (and
-      (at start (and (device-in-room ?ac ?r) (air-condition-on ?ac) (>= (time) 43200) (<= (time) 46800)))
-      (over all (not (air-condition-on ?ac)))
-      (at end (air-condition-on ?ac))
+      (at start (and (device-in-room ?ac ?r) (in-use ?ac) (>= (time) 43200) (<= (time) 46800)))
+      (over all (not (in-use ?ac)))
+      (at end (in-use ?ac))
     )
-    :effect (and (at start (not (air-condition-on ?ac)))
-                 (at end (air-condition-on ?ac)))
-    )
+    :effect (and (at start (not (in-use ?ac)))
+                 (at end (in-use ?ac)))
   )
 
   (:durative-action turn-off-light-interval
-    :parameters (?l - light ?r - room)
-    :duration (= ?duration 1)
+    :parameters (?l - switch ?r - room)
+    :duration (= ?duration 3600)
     :condition (and
       (at start (and (switch-in-room ?l ?r) (switch-on ?l) (>= (time) 43200) (<= (time) 46800)))
       (over all (not (switch-on ?l)))
       (at end (switch-on ?l))
     )
     :effect (and (at start (not (switch-on ?l)))
-                 (at end (switch-on ?l))
+                 (at end (switch-on ?l)))
+  )
+
+  (:durative-action wait-and-turn-off-projector-after-class
+    :parameters (?p - projector ?r - room)
+     :duration (= ?duration 900)
+    :condition (and
+      (at start (and (device-in-room ?p ?r) (in-use ?p) (= (time) 43200)))
+      (over all (in-use ?p))
+      (at end (device-in-room ?p ?r))
+    )
+    :effect (at end (not (in-use ?p)))
   )
 )
