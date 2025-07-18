@@ -1,5 +1,5 @@
 (define (domain smart_campus)
-  (:requirements :strips :typing :negative-preconditions :fluents)
+  (:requirements :strips :typing :fluents :durative-actions)
   (:types
     room
     device
@@ -126,7 +126,7 @@
                  (at end (switch-on ?l)))
   )
 
-  (:durative-action wait-and-turn-off-projector-after-class
+  (:durative-action wait-turn-off-projector-after-class
     :parameters (?p - projector ?r - room)
      :duration (= ?duration 900)
     :condition (and
