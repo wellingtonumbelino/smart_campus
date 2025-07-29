@@ -81,4 +81,19 @@
         )
         :effect (at start (not (device-on ?r ?p)))
     )
+
+    (:durative-action set_ac_temperature_to_22
+        :parameters (?r - room ?a - air-conditioner)
+        :duration (= ?duration 1.0)
+        :condition (and
+                        (at start (device-in-room ?r ?a))
+                        (at start (device-on ?r ?a))
+                        (at start (= (temperature ?r) 25))
+        )
+        :effect (and
+                    (at start (assign (temperature ?r) 22))
+                    (at end (increase (total-energy-consumed) (* ?duration (power-device ?a))))
+                    (at end (assign (temperature ?r) 25))
+        )
+    )
 )
