@@ -34,7 +34,7 @@
                     (at start (device-on ?r ?a))
                     (at start (assign (temperature ?r) 25))
                     (at end (increase (total-energy-consumed) (* ?duration (power-device ?a))))
-                    (at end (increase (total-ac-room-occupancy) (ac-occupancy-capacity ?a)))
+                    (at end (increase (total-ac-room-occupancy ?r) (ac-occupancy-capacity ?a)))
         )
     )
     
