@@ -15,6 +15,10 @@
         (= (power-device lamp1) 0.1)
         (= (power-device lamp2) 0.2)
         (= (power-device pj1) 0.5)
+        (= (ac-occupancy-capacity ac1) 5)
+        (= (ac-occupancy-capacity ac2) 5)
+        (= (light-occupancy-capacity lamp1) 3)
+        (= (light-occupancy-capacity lamp2) 3)
         (device-in-room room1 ac1)
         (device-in-room room1 ac2)
         (device-in-room room1 lamp1)
@@ -25,6 +29,8 @@
         (device-on room1 lamp1)
         (device-on room1 lamp2)
         (device-on room1 pj1)
+        (= (total-ac-room-occupancy room1) 0)
+        (= (total-light-room-occupancy room1) 0)
     )
     
     (:goal
@@ -34,6 +40,8 @@
             (not (device-on room1 lamp1))
             (not (device-on room1 lamp2))
             (not (device-on room1 pj1))
+            (= (total-ac-room-occupancy room1) 0)
+            (= (total-light-room-occupancy room1) 0)
         )
     )
 )
