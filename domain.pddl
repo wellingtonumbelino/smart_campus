@@ -18,7 +18,9 @@
         (power-device ?d - device)
         (temperature ?r - room)
         (ac-occupancy-capacity ?a - air-conditioner)
+        (light-occupancy-capacity ?l - light)
         (total-ac-room-occupancy ?r - room)
+        (total-light-room-occupancy ?r - room)
         (total-energy-consumed)
     )
 
@@ -60,6 +62,7 @@
         :effect (and
                     (at start (device-on ?r ?l))
                     (at end (increase (total-energy-consumed) (* ?duration (power-device ?l))))
+                    (at end (increase (total-light-room-occupancy ?r) (light-occupancy-capacity ?l)))
         )
     )
     
