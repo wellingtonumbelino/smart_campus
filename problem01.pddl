@@ -27,7 +27,7 @@
     
     (:goal
         (and
-            (>= (total-ac-room-occupancy) 8)
+            (>= (total-ac-room-occupancy room1) (occupancy room1))
         )
     )
 )

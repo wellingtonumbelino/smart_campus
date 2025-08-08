@@ -1,6 +1,6 @@
 (define (domain smart_campus)
 
-    (:requirements :typing :durative-actions :fluents)
+    (:requirements :typing :durative-actions :numeric-fluents :fluents)
 
     (:types
         device
