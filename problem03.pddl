@@ -1,47 +1,41 @@
-(define (problem morning-cool)
+(define (problem bl1_rpet)
     (:domain smart_campus)
     
     (:objects
-        room1 - room
-        ac1 ac2 - air-conditioner
-        lamp1 lamp2 - light
-        pj1 - projector
+        bl1-rpet - room
+        bl1-rpet-ac1 - air-conditioner
+        bl1-rpet-l1 bl1-rpet-l2 - light
+        bl1-rpet-p1 - projector
     )
     
     (:init
-        (= (occupancy room1) 0)
-        (= (power-device ac1) 1.5)
-        (= (power-device ac2) 2.0)
-        (= (power-device lamp1) 0.1)
-        (= (power-device lamp2) 0.2)
-        (= (power-device pj1) 0.5)
-        (= (ac-occupancy-capacity ac1) 5)
-        (= (ac-occupancy-capacity ac2) 5)
-        (= (light-occupancy-capacity lamp1) 3)
-        (= (light-occupancy-capacity lamp2) 3)
-        (device-in-room room1 ac1)
-        (device-in-room room1 ac2)
-        (device-in-room room1 lamp1)
-        (device-in-room room1 lamp2)
-        (device-in-room room1 pj1)
-        (device-on room1 ac1)
-        (device-on room1 ac2)
-        (device-on room1 lamp1)
-        (device-on room1 lamp2)
-        (device-on room1 pj1)
-        (= (total-ac-room-occupancy room1) 0)
-        (= (total-light-room-occupancy room1) 0)
+        (= (occupancy bl1-rpet) 1)
+        (= (power-device bl1-rpet-ac1) 1.5)
+        (= (power-device bl1-rpet-l1) 0.1)
+        (= (power-device bl1-rpet-l2) 0.2)
+        (= (power-device bl1-rpet-p1) 0.5)
+        (= (ac-occupancy-capacity bl1-rpet-ac1) 8)
+        (= (light-occupancy-capacity bl1-rpet-l1) 3)
+        (= (light-occupancy-capacity bl1-rpet-l2) 3)
+        (device-in-room bl1-rpet bl1-rpet-ac1)
+        (device-in-room bl1-rpet bl1-rpet-l1)
+        (device-in-room bl1-rpet bl1-rpet-l2)
+        (device-in-room bl1-rpet bl1-rpet-p1)
+        (device-on bl1-rpet ac1)
+        (device-on bl1-rpet ac2)
+        (device-on bl1-rpet lamp1)
+        (device-on bl1-rpet lamp2)
+        (device-on bl1-rpet pj1)
+        (= (total-ac-room-occupancy bl1-rpet) 0)
+        (= (total-light-room-occupancy bl1-rpet) 0)
     )
     
     (:goal
         (and
-            (not (device-on room1 ac1))
-            (not (device-on room1 ac2))
-            (not (device-on room1 lamp1))
-            (not (device-on room1 lamp2))
-            (not (device-on room1 pj1))
-            (= (total-ac-room-occupancy room1) 0)
-            (= (total-light-room-occupancy room1) 0)
+            (device-on bl1-rpet bl1-rpet-ac1)
+            (device-on bl1-rpet bl1-rpet-l1)
+            (not (device-on bl1-rpet bl1-rpet-l2))
+            (not (device-on bl1-rpet bl1-rpet-p1))
         )
     )
 )
