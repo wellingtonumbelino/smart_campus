@@ -15,13 +15,16 @@
     
     (:functions
         (occupancy ?r - room)
-        (power-device ?d - device)
         (temperature ?r - room)
-        (ac-occupancy-capacity ?a - air-conditioner)
-        (light-occupancy-capacity ?l - light)
         (total-ac-room-occupancy ?r - room)
         (total-light-room-occupancy ?r - room)
+        (total-acs-in-room ?r - room)
+        (total-lights-in-room ?r - room)
+        (power-device ?d - device)
+        (ac-occupancy-capacity ?a - air-conditioner)
+        (light-occupancy-capacity ?l - light)
         (total-energy-consumed)
+        (current-time)
     )
 
     (:durative-action turn_on_air_conditioner
@@ -100,6 +103,20 @@
                     (at start (assign (temperature ?r) 22))
                     (at end (increase (total-energy-consumed) (* ?duration (power-device ?a))))
                     (at end (assign (temperature ?r) 25))
+        )
+    )
+
+    (:durative-action reduce_room_devices_capacity
+        :parameters (?r - room)
+        :duration (= ?duration 3.0)
+        :condition (and
+                        (at start (>= (current-time) 17500000))
+                        (at start (<= (current-time) 20300000))
+                        (over all (<= ()))
+        )
+        :effect (and
+                    ()
+
         )
     )
 )
