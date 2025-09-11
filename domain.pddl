@@ -20,6 +20,7 @@
         (total-light-room-occupancy ?r - room)
         (total-acs-in-room ?r - room)
         (total-lights-in-room ?r - room)
+        (acs-on-in-room ?r)
         (power-device ?d - device)
         (ac-occupancy-capacity ?a - air-conditioner)
         (light-occupancy-capacity ?l - light)
@@ -107,15 +108,18 @@
     )
 
     (:durative-action reduce_room_devices_capacity
-        :parameters (?r - room)
+        :parameters (?r - room ?a - air-conditioner)
         :duration (= ?duration 3.0)
         :condition (and
+                        (at start (device-in-room ?r ?a))
+                        (at start (device-on ?r ?a))
                         (at start (>= (current-time) 17500000))
                         (at start (<= (current-time) 20300000))
-                        (over all (<= ()))
+                        (at start (> (acs-on-in-room ?r) (/ (total-acs-in-room ?r) 2)))
         )
         :effect (and
-                    ()
+                    (at start (not (device-on ?r ?a)))
+                    (at start (decrease (acs-on-in-room ?r) 1))
 
         )
     )
