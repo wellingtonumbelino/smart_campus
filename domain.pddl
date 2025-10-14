@@ -1,51 +1,55 @@
 (define (domain smart_campus)
+   ; com esse domínio desejamos:
+   ; ligar os ar-condicionados das salas no inicio do dia (7:50 da manhã) ao notar presença de pessoas na sala
+   ; manter o ar-condicionado ligado durante o período de aulas da manhã (até 12:10), computando o valor de energia gasta durante o período
+   ; desligar os ar-condicionados durante o período do intervalo do almoço (das 12:10 às 13:20), se não tiver pessoas na sala
+   ; ligar os ar-condicionados das salas no início da tarde (13:20 da tarde) ao notar a presença de pessoas na sala
+   ; desligar os ar-condicionados no final do dia (17:40 da tarde) se não tiver pessoas na sala
+   ; ligar e desligar luzes
+   ; desligar projetor - o projetor será ligado conforme a necessidade do humano (professor/aluno)
+   ; desligar os ar-condicionados em horários de aulas mas que não há pessoas na sala
 
   (:requirements :typing :fluents)
 
   (:types
-    device
-    environment
-    air_conditioner light projector - device
+    device ; é um dispositivo consumidor de energia
+    room ; é uma sala
+    air_conditioner light projector - device ; tipos de dispositivos
   )
-
-  ; un-comment following line if constants are needed
-  ;(:constants )
 
   (:predicates
-    (device_at ?d - device ?e - environment)
-    (device_on ?d - device)
+    (device_at ?d - device ?r - room) ; dispositivo localizado em uma sala
+    (device_on ?d - device) ; dispositivo ligado ou desligado
   )
 
-
   (:functions
-    (occupancy ?e - environment) ; numero de pessoas no ambiente
-    (temperature ?e - environment); temperatura atual do ambiente
-    (power_device ?d - device) ; consumo de energia por hora do dispositivo
+    (occupancy ?r - room) ; numero de pessoas na sala
+    (temperature_room ?r - room); temperatura atual da sala
+    (power_consumption ?d - device) ; consumo de energia por hora do dispositivo ??? seria uma constante? porque cada dispositivo possui o valor fixo
     (total_energy_consumed) ; consumo total de energia do campus
     (current_time) ; hora atual do dia
   )
 
   (:action turn_on_air_conditioner
-    :parameters (?ac - air_conditioner ?e - environment)
+    :parameters (?ac - air_conditioner ?r - room)
     :precondition (and 
-      (device_at ?ac ?e)
+      (device_at ?ac ?r)
       (not (device_on ?ac))
-      (= (current_time) 25200)
-      (> (occupancy ?e) 0)
+      (>= (current_time) 25200) ; após 7:50 da manhã em segundos
+      (> (occupancy ?r) 0) ; o número de ocupantes ser maior do que zero
     )
     :effect (and 
       (device_on ?ac)
-      (increase (total_energy_consumed) (power_device ?ac))
-      (decrease (temperature ?e) 5)
+      (increase (total_energy_consumed) (power_consumption ?ac)) ; sem ações durativas como podemos controlar o tempo que fica ligado?
     )
   )
 
   (:action turn_off_air_conditioner
-    :parameters (?ac - air_conditioner ?e - environment)
+    :parameters (?ac - air_conditioner ?r - room)
     :precondition (and 
-      (device_at ?ac ?e)
+      (device_at ?ac ?r)
       (device_on ?ac)
-      (= (occupancy ?e) 0)
+      (= (occupancy ?r) 0)
     )
     :effect (and 
       (not (device_on ?ac))
@@ -53,25 +57,25 @@
   )
   
   (:action turn_on_light
-    :parameters (?l - light ?e - environment)
+    :parameters (?l - light ?r - room)
     :precondition (and 
-      (device_at ?l ?e)
+      (device_at ?l ?r)
       (not (device_on ?l))
       (= (current_time) 25200)
-      (> (occupancy ?e) 0)
+      (> (occupancy ?r) 0)
     )
     :effect (and 
       (device_on ?l)
-      (increase (total_energy_consumed) (power_device ?l))
+      (increase (total_energy_consumed) (power_consumption ?l))
     )
   )
 
   (:action turn_off_light
-    :parameters (?l - light ?e - environment)
+    :parameters (?l - light ?r - room)
     :precondition (and 
-      (device_at ?l ?e)
+      (device_at ?l ?r)
       (device_on ?l)
-      (= (occupancy ?e) 0)
+      (= (occupancy ?r) 0)
     )
     :effect (and 
       (not (device_on ?l))
@@ -79,11 +83,11 @@
   )
 
   (:action turn_off_projector
-    :parameters (?p - projector ?e - environment)
+    :parameters (?p - projector ?r - room)
     :precondition (and 
-      (device_at ?p ?e)
+      (device_at ?p ?r)
       (device_on ?p)
-      (= (occupancy ?e) 0)
+      (= (occupancy ?r) 0)
     )
     :effect (and 
       (not (device_on ?p))
