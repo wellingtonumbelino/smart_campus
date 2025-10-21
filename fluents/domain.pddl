@@ -24,8 +24,9 @@
 
   (:functions
     (occupancy ?r - room) ; numero de pessoas na sala
-    (temperature_room ?r - room); temperatura atual da sala
-    (power_consumption ?d - device) ; consumo de energia por hora do dispositivo ??? seria uma constante? porque cada dispositivo possui o valor fixo
+    (air_conditioner_temperature ?a - air_conditioner) ; temperatura atual do ar-condicionado
+    (room_temperature ?r - room); temperatura atual da sala
+    (power_consumption ?d - device) ; consumo de energia por minuto do dispositivo
     (total_energy_consumed) ; consumo total de energia do campus
     (current_time) ; hora atual do dia
   )
@@ -36,11 +37,11 @@
       (device_at ?ac ?r)
       (not (device_on ?ac))
       (>= (current_time) 25200) ; após 7:50 da manhã em segundos
-      (> (occupancy ?r) 0) ; o número de ocupantes ser maior do que zero
+      (> (occupancy ?r) 0) ; o número de ocupantes deve ser maior do que zero
     )
     :effect (and 
       (device_on ?ac)
-      (increase (total_energy_consumed) (power_consumption ?ac)) ; sem ações durativas como podemos controlar o tempo que fica ligado?
+      (increase (total_energy_consumed) (power_consumption ?ac))
     )
   )
 
@@ -91,6 +92,33 @@
     )
     :effect (and 
       (not (device_on ?p))
+    )
+  )
+
+  (:action set_air_conditioner_temp_22_degrees
+    :parameters (?r - room ?a - air_conditioner)
+    :precondition (and
+      (device_at ?a ?r)
+      (device_on ?a)
+      (> (room_temperature ?r) 24)
+      (> (occupancy ?r) 0)
+    )
+    :effect (and
+      (assign (air_conditioner_temperature ?a) 22)
+    )
+  )
+
+  (:action set_air_conditioner_temp_24_degrees
+    :parameters (?r - room ?a - air_conditioner)
+    :precondition (and
+      (device_at ?a ?r)
+      (device_on ?a)
+      (<= (room_temperature ?r) 24)
+      (>= (room_temperature ?r) 22)
+      (> (occupancy ?r) 0)
+    )
+    :effect (and
+      (assign (air_conditioner_temperature ?a) 24)
     )
   )
 )
