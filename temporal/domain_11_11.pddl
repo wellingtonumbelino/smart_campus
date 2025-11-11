@@ -8,7 +8,13 @@
    ; desligar os ar-condicionados em horários de aulas mas que não há pessoas na sala
    ; intervalo das aulas de 8h às 12h, das 13:30h às 17:30, e das 18h às 22h
 
-    (:requirements :typing :fluents :durative-actions)
+    (:requirements
+         :typing
+         :fluents
+         :durative-actions
+         :timed-initial-literals
+         :timed-initial-fluents
+   )
 
     (:types
         device
