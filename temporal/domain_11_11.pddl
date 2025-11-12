@@ -8,7 +8,7 @@
 ; intervalo das aulas de 8h às 12h, das 13:30h às 17:30, e das 18h às 22h
 
 (define (domain smart_campus)
-  (:requirements :typing :fluents :durative-actions :negative-preconditions :timed-initial-literals)
+  (:requirements :typing :fluents :durative-actions :negative-preconditions :timed-initial-literals :timed-initial-fluents)
 
   (:types
     room device
